@@ -1,0 +1,14 @@
+.stuff
+.vscode
+.idea
+**/.DS_Store
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+smsenderu.iml
