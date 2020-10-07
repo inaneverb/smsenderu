@@ -39,8 +39,8 @@ func (q *senderSmsRu) Check() *ekaerr.Error {
 	}
 
 	const URL = "https://sms.ru/auth/check"
-	fhReq := fasthttp.AcquireRequest(); fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -72,8 +72,8 @@ func (q *senderSmsRu) Balance() (decimal.Decimal, string, *ekaerr.Error) {
 	}
 
 	const URL = "https://sms.ru/my/balance"
-	fhReq := fasthttp.AcquireRequest(); fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -140,8 +140,8 @@ func (q *senderSmsRu) Senders() ([]string, *ekaerr.Error) {
 	}
 
 	const URL = "https://sms.ru/my/senders"
-	fhReq := fasthttp.AcquireRequest(); fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -196,8 +196,8 @@ func (q *senderSmsRu) Send(
 	}
 
 	const URL = "https://sms.ru/sms/send"
-	fhReq := fasthttp.AcquireRequest(); fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -312,8 +312,8 @@ func (q *senderSmsRu) Cost(
 	}
 
 	const URL = "https://sms.ru/sms/cost"
-	fhReq := fasthttp.AcquireRequest(); fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -397,8 +397,8 @@ func (q *senderSmsRu) Status(
 	}
 
 	const URL = "https://sms.ru/sms/status"
-	fhReq := fasthttp.AcquireRequest(); fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
