@@ -190,7 +190,7 @@ func (q *senderSmsRu) Send(
 		return nil, ekaerr.IllegalArgument.
 			New(s + "Incorrect argument(s) of sending message request.").
 			AddFields(
-				"smsru_send_request_why_invalid", sendMessageRequestIsValid(req),
+				"smsru_send_request_why_invalid", sendMessageRequestWhyInvalid(req),
 				"smsru_send_request_dump", spew.Sdump(req)).
 			Throw()
 	}
@@ -306,7 +306,7 @@ func (q *senderSmsRu) Cost(
 		return nil, ekaerr.IllegalArgument.
 			New(s + "Incorrect argument(s) of sending message request.").
 			AddFields(
-				"smsru_cost_request_why_invalid", sendMessageRequestIsValid(req),
+				"smsru_cost_request_why_invalid", sendMessageRequestWhyInvalid(req),
 				"smsru_cost_request_dump", spew.Sdump(req)).
 			Throw()
 	}
