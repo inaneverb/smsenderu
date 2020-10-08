@@ -20,7 +20,7 @@ import (
 
 const (
 //==============================================================================//
-	TOKEN = `171E5FA2-8D02-D511-1E8C-A6D6A6B984EB`
+	TOKEN = `< place your token here >`
 //==============================================================================//
 )
 
@@ -52,6 +52,7 @@ func TestSenderSmsRu_Senders(t *testing.T) {
 	senders, err := q.Senders()
 	err.LogAsError("Failed to get SMS.RU senders.")
 	require.True(t, err.IsNil())
+	spew.Dump(senders)
 	require.EqualValues(t, expectedSenders, senders)
 }
 
