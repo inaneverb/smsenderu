@@ -1,14 +1,14 @@
 // Copyright © 2020. All rights reserved.
 // Author: Ilya Stroy.
-// Contacts: qioalice@gmail.com, https://github.com/qioalice
+// Contacts: iyuryevich@pm.me, https://github.com/qioalice
 // License: https://opensource.org/licenses/MIT
 
 package smsenderu
 
 import (
-	"github.com/qioalice/ekago/v2/ekaerr"
-
 	"github.com/shopspring/decimal"
+
+	"github.com/qioalice/ekago/v3/ekaerr"
 )
 
 type (
@@ -23,7 +23,8 @@ type (
 		Balance() (balance decimal.Decimal, currency string, err *ekaerr.Error)
 		BalanceIn(currency string) (balance decimal.Decimal, err *ekaerr.Error)
 
-		//
+		// Senders must return a list of available senders,
+		// that can be used through API as a displayable sender for recipients.
 		Senders() ([]string, *ekaerr.Error)
 
 		Send(req *SendMessageRequest) (resp *SendMessageResponse, err *ekaerr.Error)

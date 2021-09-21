@@ -1,6 +1,6 @@
 // Copyright © 2020. All rights reserved.
 // Author: Ilya Stroy.
-// Contacts: qioalice@gmail.com, https://github.com/qioalice
+// Contacts: iyuryevich@pm.me, https://github.com/qioalice
 // License: https://opensource.org/licenses/MIT
 
 package smsenderu_smsru
@@ -9,17 +9,18 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/qioalice/ekago/v2/ekaerr"
-
-	"github.com/qioalice/smsenderu"
-
 	"github.com/davecgh/go-spew/spew"
 	"github.com/shopspring/decimal"
 	"github.com/valyala/fasthttp"
+
+	"github.com/qioalice/ekago/v3/ekaerr"
+	"github.com/qioalice/ekago/v3/ekastr"
+
+	"github.com/qioalice/smsenderu"
 )
 
 func NewSender(token string) smsenderu.Sender {
-	return &senderSmsRu{ token: token }
+	return &senderSmsRu{token: token}
 }
 
 func (q *senderSmsRu) Check() *ekaerr.Error {
@@ -39,8 +40,10 @@ func (q *senderSmsRu) Check() *ekaerr.Error {
 	}
 
 	const URL = "https://sms.ru/auth/check"
-	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -72,8 +75,10 @@ func (q *senderSmsRu) Balance() (decimal.Decimal, string, *ekaerr.Error) {
 	}
 
 	const URL = "https://sms.ru/my/balance"
-	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -88,8 +93,8 @@ func (q *senderSmsRu) Balance() (decimal.Decimal, string, *ekaerr.Error) {
 	balance, legacyErr := decimal.NewFromString(string(respParts[0]))
 	if legacyErr != nil {
 		return decimal.Zero, "", ekaerr.IllegalFormat.
-			Wrap(legacyErr, s + "Cannot decode balance value from API response.").
-			AddFields("smsru_balance_raw", string(respParts[0])).
+			Wrap(legacyErr, s+"Cannot decode balance value from API response.").
+			WithString("smsru_balance_raw", ekastr.B2S(respParts[0])).
 			Throw()
 	}
 
@@ -117,8 +122,8 @@ func (q *senderSmsRu) BalanceIn(currency string) (balance decimal.Decimal, err *
 
 	default:
 		return decimal.Zero, ekaerr.IllegalArgument.
-			New(s + "Incorrect currency. Only 'RUB' is supported.").
-			AddFields("smsru_required_currency", currency).
+			New(s+"Incorrect currency. Only 'RUB' is supported.").
+			WithString("smsru_required_currency", currency).
 			Throw()
 	}
 }
@@ -140,8 +145,10 @@ func (q *senderSmsRu) Senders() ([]string, *ekaerr.Error) {
 	}
 
 	const URL = "https://sms.ru/my/senders"
-	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -170,7 +177,7 @@ func (q *senderSmsRu) Send(
 	req *smsenderu.SendMessageRequest,
 ) (
 	resp *smsenderu.SendMessageResponse,
-	err  *ekaerr.Error,
+	err *ekaerr.Error,
 ) {
 	// https://sms.ru/api/send
 	const s = "SMS.RU: Failed to send a message(s). "
@@ -188,16 +195,17 @@ func (q *senderSmsRu) Send(
 
 	case !sendMessageRequestIsValid(req):
 		return nil, ekaerr.IllegalArgument.
-			New(s + "Incorrect argument(s) of sending message request.").
-			AddFields(
-				"smsru_send_request_why_invalid", sendMessageRequestWhyInvalid(req),
-				"smsru_send_request_dump", spew.Sdump(req)).
+			New(s+"Incorrect argument(s) of sending message request.").
+			WithString("smsru_send_request_why_invalid", sendMessageRequestWhyInvalid(req)).
+			WithString("smsru_send_request_dump", spew.Sdump(req)).
 			Throw()
 	}
 
 	const URL = "https://sms.ru/sms/send"
-	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -246,14 +254,13 @@ func (q *senderSmsRu) Send(
 			Throw()
 	}
 
-	if len(respParts) != len(req.Recipients) +1 {
+	if len(respParts) != len(req.Recipients)+1 {
 		return nil, ekaerr.IllegalFormat.
-			New(s + "Mismatch sizes of the response and request phone numbers.").
-			AddFields(
-				"smsru_send_request_phone_numbers", len(req.Recipients),
-				"smsru_send_response_phone_numbers", len(respParts),
-				"smsru_send_request_dump", spew.Sdump(req),
-				"smsru_send_response_raw", string(fhResp.Body())).
+			New(s+"Mismatch sizes of the response and request phone numbers.").
+			WithInt("smsru_send_request_phone_numbers", len(req.Recipients)).
+			WithInt("smsru_send_response_phone_numbers", len(respParts)).
+			WithString("smsru_send_request_dump", spew.Sdump(req)).
+			WithString("smsru_send_response_raw", ekastr.B2S(fhResp.Body())).
 			Throw()
 	}
 
@@ -273,7 +280,7 @@ func (q *senderSmsRu) Send(
 			// Seems like error code
 			resp.ErrorCodes[i], _ = strconv.Atoi(string(respParts[i]))
 		} else {
-			resp.IDs[i]        = string(respParts[i])
+			resp.IDs[i] = string(respParts[i])
 			resp.ErrorCodes[i] = STATUS_OK
 		}
 	}
@@ -286,7 +293,7 @@ func (q *senderSmsRu) Cost(
 	req *smsenderu.SendMessageRequest,
 ) (
 	resp *smsenderu.CostSendMessageResponse,
-	err  *ekaerr.Error,
+	err *ekaerr.Error,
 ) {
 	// https://sms.ru/api/cost
 	const s = "SMS.RU: Failed to get an info about cost of sending a message(s). "
@@ -304,16 +311,17 @@ func (q *senderSmsRu) Cost(
 
 	case !sendMessageRequestIsValid(req):
 		return nil, ekaerr.IllegalArgument.
-			New(s + "Incorrect argument(s) of sending message request.").
-			AddFields(
-				"smsru_cost_request_why_invalid", sendMessageRequestWhyInvalid(req),
-				"smsru_cost_request_dump", spew.Sdump(req)).
+			New(s+"Incorrect argument(s) of sending message request.").
+			WithString("smsru_cost_request_why_invalid", sendMessageRequestWhyInvalid(req)).
+			WithString("smsru_cost_request_dump", spew.Sdump(req)).
 			Throw()
 	}
 
 	const URL = "https://sms.ru/sms/cost"
-	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
@@ -358,10 +366,9 @@ func (q *senderSmsRu) Cost(
 	cost, legacyErr := decimal.NewFromString(string(respParts[0]))
 	if legacyErr != nil {
 		return nil, ekaerr.IllegalFormat.
-			Wrap(legacyErr, s + "Cannot decode the cost of sending message(s).").
-			AddFields(
-				"smsru_cost_request_dump", spew.Sdump(req),
-				"smsru_cost_response_raw", string(fhResp.Body())).
+			Wrap(legacyErr, s+"Cannot decode the cost of sending message(s).").
+			WithString("smsru_cost_request_dump", spew.Sdump(req)).
+			WithString("smsru_cost_response_raw", ekastr.B2S(fhResp.Body())).
 			Throw()
 	}
 
@@ -397,8 +404,10 @@ func (q *senderSmsRu) Status(
 	}
 
 	const URL = "https://sms.ru/sms/status"
-	fhReq := fasthttp.AcquireRequest(); defer fasthttp.ReleaseRequest(fhReq)
-	fhResp := fasthttp.AcquireResponse(); defer fasthttp.ReleaseResponse(fhResp)
+	fhReq := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(fhReq)
+	fhResp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(fhResp)
 
 	fhReq.SetRequestURI(URL)
 	fhReq.URI().QueryArgs().Add("api_id", q.token)
