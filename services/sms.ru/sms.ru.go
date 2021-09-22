@@ -25,17 +25,17 @@ func NewSender(token string) smsenderu.Sender {
 
 func (q *senderSmsRu) Check() *ekaerr.Error {
 	// https://sms.ru/api/auth_check
-	const s = "SMS.RU: Failed to check whether provided API token is valid. "
+	const s = "SMS.RU: Failed to check whether provided API token is valid."
 	switch {
 
 	case q == nil:
-		return ekaerr.IllegalArgument.
-			New(s + "Invalid sender object. Did you use NewSender() constructor correctly?").
+		return ekaerr.IllegalArgument.New(s).
+			WithString("description", "Invalid sender object. Did you use NewSender() constructor correctly?").
 			Throw()
 
 	case q.token == "":
-		return ekaerr.IllegalArgument.
-			New(s + "API token is not provided or empty.").
+		return ekaerr.IllegalArgument.New(s).
+			WithString("description", "API token is not provided or empty.").
 			Throw()
 	}
 
@@ -60,17 +60,17 @@ func (q *senderSmsRu) Check() *ekaerr.Error {
 
 func (q *senderSmsRu) Balance() (decimal.Decimal, string, *ekaerr.Error) {
 	// https://sms.ru/api/balance
-	const s = "SMS.RU: Failed to get balance. "
+	const s = "SMS.RU: Failed to get balance."
 	switch {
 
 	case q == nil:
-		return decimal.Zero, "", ekaerr.IllegalArgument.
-			New(s + "Invalid sender object. Did you use NewSender() constructor correctly?").
+		return decimal.Zero, "", ekaerr.IllegalArgument.New(s).
+			WithString("description", "Invalid sender object. Did you use NewSender() constructor correctly?").
 			Throw()
 
 	case q.token == "":
-		return decimal.Zero, "", ekaerr.IllegalArgument.
-			New(s + "API token is not provided or empty.").
+		return decimal.Zero, "", ekaerr.IllegalArgument.New(s).
+			WithString("description", "API token is not provided or empty.").
 			Throw()
 	}
 
@@ -92,8 +92,8 @@ func (q *senderSmsRu) Balance() (decimal.Decimal, string, *ekaerr.Error) {
 
 	balance, legacyErr := decimal.NewFromString(string(respParts[0]))
 	if legacyErr != nil {
-		return decimal.Zero, "", ekaerr.IllegalFormat.
-			Wrap(legacyErr, s+"Cannot decode balance value from API response.").
+		return decimal.Zero, "", ekaerr.IllegalFormat.Wrap(legacyErr, s).
+			WithString("description", "Cannot decode balance value from API response.").
 			WithString("smsru_balance_raw", ekastr.B2S(respParts[0])).
 			Throw()
 	}
@@ -102,7 +102,7 @@ func (q *senderSmsRu) Balance() (decimal.Decimal, string, *ekaerr.Error) {
 }
 
 func (q *senderSmsRu) BalanceIn(currency string) (balance decimal.Decimal, err *ekaerr.Error) {
-	const s = "SMS.RU: Failed to get balance in the specified currency. "
+	const s = "SMS.RU: Failed to get balance in the specified currency."
 
 	currency = strings.TrimSpace(currency)
 	currency = strings.ToUpper(currency)
@@ -116,13 +116,13 @@ func (q *senderSmsRu) BalanceIn(currency string) (balance decimal.Decimal, err *
 			Throw()
 
 	case "":
-		return decimal.Zero, ekaerr.IllegalArgument.
-			New(s + "Currency is empty or not provided.").
+		return decimal.Zero, ekaerr.IllegalArgument.New(s).
+			WithString("description", "Currency is empty or not provided.").
 			Throw()
 
 	default:
-		return decimal.Zero, ekaerr.IllegalArgument.
-			New(s+"Incorrect currency. Only 'RUB' is supported.").
+		return decimal.Zero, ekaerr.IllegalArgument.New(s).
+			WithString("description", "Incorrect currency. Only 'RUB' is supported.").
 			WithString("smsru_required_currency", currency).
 			Throw()
 	}
@@ -130,17 +130,17 @@ func (q *senderSmsRu) BalanceIn(currency string) (balance decimal.Decimal, err *
 
 func (q *senderSmsRu) Senders() ([]string, *ekaerr.Error) {
 	// https://sms.ru/api/senders
-	const s = "SMS.RU: Failed to get registered senders. "
+	const s = "SMS.RU: Failed to get registered senders."
 	switch {
 
 	case q == nil:
-		return nil, ekaerr.IllegalArgument.
-			New(s + "Invalid sender object. Did you use NewSender() constructor correctly?").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "Invalid sender object. Did you use NewSender() constructor correctly?").
 			Throw()
 
 	case q.token == "":
-		return nil, ekaerr.IllegalArgument.
-			New(s + "API token is not provided or empty.").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "API token is not provided or empty.").
 			Throw()
 	}
 
@@ -180,22 +180,22 @@ func (q *senderSmsRu) Send(
 	err *ekaerr.Error,
 ) {
 	// https://sms.ru/api/send
-	const s = "SMS.RU: Failed to send a message(s). "
+	const s = "SMS.RU: Failed to send a message(s)."
 	switch {
 
 	case q == nil:
-		return nil, ekaerr.IllegalArgument.
-			New(s + "Invalid sender object. Did you use NewSender() constructor correctly?").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "Invalid sender object. Did you use NewSender() constructor correctly?").
 			Throw()
 
 	case q.token == "":
-		return nil, ekaerr.IllegalArgument.
-			New(s + "API token is not provided or empty.").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "API token is not provided or empty.").
 			Throw()
 
 	case !sendMessageRequestIsValid(req):
-		return nil, ekaerr.IllegalArgument.
-			New(s+"Incorrect argument(s) of sending message request.").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "Incorrect argument(s) of sending message request.").
 			WithString("smsru_send_request_why_invalid", sendMessageRequestWhyInvalid(req)).
 			WithString("smsru_send_request_dump", spew.Sdump(req)).
 			Throw()
@@ -255,8 +255,8 @@ func (q *senderSmsRu) Send(
 	}
 
 	if len(respParts) != len(req.Recipients)+1 {
-		return nil, ekaerr.IllegalFormat.
-			New(s+"Mismatch sizes of the response and request phone numbers.").
+		return nil, ekaerr.IllegalFormat.New(s).
+			WithString("description", "Mismatch sizes of the response and request phone numbers.").
 			WithInt("smsru_send_request_phone_numbers", len(req.Recipients)).
 			WithInt("smsru_send_response_phone_numbers", len(respParts)).
 			WithString("smsru_send_request_dump", spew.Sdump(req)).
@@ -296,22 +296,22 @@ func (q *senderSmsRu) Cost(
 	err *ekaerr.Error,
 ) {
 	// https://sms.ru/api/cost
-	const s = "SMS.RU: Failed to get an info about cost of sending a message(s). "
+	const s = "SMS.RU: Failed to get an info about cost of sending a message(s)."
 	switch {
 
 	case q == nil:
-		return nil, ekaerr.IllegalArgument.
-			New(s + "Invalid sender object. Did you use NewSender() constructor correctly?").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "Invalid sender object. Did you use NewSender() constructor correctly?").
 			Throw()
 
 	case q.token == "":
-		return nil, ekaerr.IllegalArgument.
-			New(s + "API token is not provided or empty.").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "API token is not provided or empty.").
 			Throw()
 
 	case !sendMessageRequestIsValid(req):
-		return nil, ekaerr.IllegalArgument.
-			New(s+"Incorrect argument(s) of sending message request.").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "Incorrect argument(s) of sending message request.").
 			WithString("smsru_cost_request_why_invalid", sendMessageRequestWhyInvalid(req)).
 			WithString("smsru_cost_request_dump", spew.Sdump(req)).
 			Throw()
@@ -365,8 +365,8 @@ func (q *senderSmsRu) Cost(
 
 	cost, legacyErr := decimal.NewFromString(string(respParts[0]))
 	if legacyErr != nil {
-		return nil, ekaerr.IllegalFormat.
-			Wrap(legacyErr, s+"Cannot decode the cost of sending message(s).").
+		return nil, ekaerr.IllegalFormat.Wrap(legacyErr, s).
+			WithString("description", "Cannot decode the cost of sending message(s).").
 			WithString("smsru_cost_request_dump", spew.Sdump(req)).
 			WithString("smsru_cost_response_raw", ekastr.B2S(fhResp.Body())).
 			Throw()
@@ -384,22 +384,22 @@ func (q *senderSmsRu) Status(
 	err *ekaerr.Error,
 ) {
 	// https://sms.ru/api/status
-	const s = "SMS.RU: Failed to get an info about message. "
+	const s = "SMS.RU: Failed to get an info about message."
 	switch {
 
 	case q == nil:
-		return nil, ekaerr.IllegalArgument.
-			New(s + "Invalid sender object. Did you use NewSender() constructor correctly?").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "Invalid sender object. Did you use NewSender() constructor correctly?").
 			Throw()
 
 	case q.token == "":
-		return nil, ekaerr.IllegalArgument.
-			New(s + "API token is not provided or empty.").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "API token is not provided or empty.").
 			Throw()
 
 	case sentSmsId == "":
-		return nil, ekaerr.IllegalArgument.
-			New(s + "SMS ID is empty or not provided.").
+		return nil, ekaerr.IllegalArgument.New(s).
+			WithString("description", "SMS ID is empty or not provided.").
 			Throw()
 	}
 

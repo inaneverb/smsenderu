@@ -173,16 +173,17 @@ func (q *senderSmsRu) do(
 	parts [][]byte,
 	err *ekaerr.Error,
 ) {
+	const s = "SMS.RU: Failed to perform remote HTTP request."
+
 	legacyErr := q.fhc.DoRedirects(fhReq, fhResp, 5)
 	if legacyErr != nil {
-		return nil, ekaerr.ServiceUnavailable.
-			Wrap(legacyErr, "Failed to perform HTTP request.").
+		return nil, ekaerr.ServiceUnavailable.Wrap(legacyErr, s).
 			Throw()
 	}
 
 	if httpCode := fhResp.StatusCode(); httpCode != fasthttp.StatusOK {
-		return nil, ekaerr.RejectedOperation.
-			New("API response finished with other than HTTP 200 status code.").
+		return nil, ekaerr.RejectedOperation.New(s).
+			WithString("description", "API response finished with other than HTTP 200 status code.").
 			WithInt("smsru_response_http_code", httpCode).
 			Throw()
 	}
@@ -194,8 +195,8 @@ func (q *senderSmsRu) do(
 
 	statusCode, parts = q.decodeResponse(fhResp.Body())
 	if statusCode == 0 {
-		return nil, ekaerr.IllegalFormat.
-			New("Failed to decode API response. It is empty or without status.").
+		return nil, ekaerr.IllegalFormat.New(s).
+			WithString("description", "Failed to decode API response. It is empty or without status.").
 			WithString("smsru_response_raw", ekastr.B2S(fhResp.Body())).
 			Throw()
 	}
@@ -204,8 +205,8 @@ func (q *senderSmsRu) do(
 		if statusCodeMeaning_, ok := statusCodeMeaningMap[statusCode]; ok {
 			statusCodeMeaning = statusCodeMeaning_
 		}
-		return nil, ekaerr.IllegalFormat.
-			New("API response finished with not OK code.").
+		return nil, ekaerr.IllegalFormat.New(s).
+			WithString("description", "API response finished with not OK code.").
 			WithInt("smsru_response_status_code", statusCode).
 			WithString("smsru_response_status_code_meaning", statusCodeMeaning).
 			WithString("smsru_response_raw", ekastr.B2S(fhResp.Body())).
@@ -213,8 +214,8 @@ func (q *senderSmsRu) do(
 	}
 
 	if len(parts) < requiredParts {
-		return nil, ekaerr.IllegalFormat.
-			New("Failed to decode API response. Unexpected number of parts.").
+		return nil, ekaerr.IllegalFormat.New(s).
+			WithString("description", "Failed to decode API response. Unexpected number of parts.").
 			WithInt("smsru_response_required_parts", requiredParts).
 			WithInt("smsru_response_got_parts", len(parts)).
 			WithString("smsru_response_raw", ekastr.B2S(fhResp.Body())).
